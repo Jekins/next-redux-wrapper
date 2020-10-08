@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useRef} from 'react';
 import {Store, AnyAction, Action} from 'redux';
 import {Provider} from 'react-redux';
 import {GetServerSideProps, GetStaticProps, NextComponentType, NextPage, NextPageContext} from 'next';
@@ -18,6 +18,8 @@ const getSerializedState = (state: any, {serializeState}: Config = {}) =>
     serializeState ? serializeState(state) : state;
 
 const getStoreKey = ({storeKey}: Config = {}) => storeKey || STOREKEY;
+
+const useIsomorphicLayoutEffect = getIsServer ? useEffect : useLayoutEffect;
 
 export declare type MakeStore<S = any, A extends Action = AnyAction> = (context: Context) => Store<S, A>;
 
@@ -186,7 +188,7 @@ export const createWrapper = <S extends {} = any, A extends Action = AnyAction>(
             if (isFirstRender.current) hydrate();
 
             // apply async in case props have changed, on navigation for example
-            useEffect(() => {
+            useIsomorphicLayoutEffect(() => {
                 if (isFirstRender.current) {
                     isFirstRender.current = false;
                     return;
